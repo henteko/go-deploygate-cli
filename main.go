@@ -1,10 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/ddliu/go-httpclient"
-	flags "github.com/jessevdk/go-flags"
-	"os"
 )
 
 const (
@@ -13,23 +12,23 @@ const (
 	CONNECT_TIMEOUT = 5
 )
 
-type Options struct {
-	ApiKey      string `short:"a" long:"apikey" description:"Your DeployGate Api Key"`
-	UserName    string `short:"u" long:"username" description:"Your DeployGate User Name"`
-	AppFilePath string `short:"f" long:"AppFilePath" description:"Upload App File Path"`
-}
-
-var opts Options
-
 func main() {
-	parser := flags.NewParser(&opts, flags.Default)
-	parser.Name = "godeploy"
-	parser.Usage = "[OPTIONS] PATTERN [PATH]"
+	var (
+		userName    string
+		apiKey      string
+		appFilePath string
+	)
 
-	args, _ := parser.Parse()
+	flag.StringVar(&userName, "username", "blank", "your DeployGate User Name")
+	flag.StringVar(&userName, "u", "blank", "your DeployGate User Name")
+	flag.StringVar(&apiKey, "apikey", "blank", "your DeployGate Api Key")
+	flag.StringVar(&apiKey, "a", "blank", "your DeployGate Api Key")
+	flag.StringVar(&appFilePath, "file", "blank", "upload App File Path")
+	flag.StringVar(&appFilePath, "f", "blank", "upload App File Path")
+	flag.Parse()
 
-	if (opts.ApiKey == "" || opts.UserName == "" || opts.AppFilePath == "") && len(args) == 0 {
-		parser.WriteHelp(os.Stdout)
+	if userName == "" || apiKey == "" || appFilePath == "" {
+		fmt.Println("Error: must input")
 		return
 	}
 
@@ -38,10 +37,10 @@ func main() {
 		httpclient.OPT_TIMEOUT:   TIMEOUT,
 	})
 
-	url := "https://deploygate.com/api/users/" + opts.UserName + "/apps"
+	url := "https://deploygate.com/api/users/" + userName + "/apps"
 	res, err := c.Post(url, map[string]string{
-		"@file": opts.AppFilePath,
-		"token": opts.ApiKey,
+		"@file": appFilePath,
+		"token": apiKey,
 	})
 
 	fmt.Println(res, err)
